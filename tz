@@ -1,0 +1,41 @@
+Specyfikacja Techniczna: Konkurs "Święto Liczby Pi"
+Opis projektu: Celem jest stworzenie interaktywnej witryny internetowej, która sprawdza znajomość rozwinięcia liczby PI przez uczestników. System musi zliczać poprawnie wpisane cyfry po przecinku (3.14...). Całość powinna zostać zrealizowana w technologii PHP z bazą danych MySQL.
+
+1. Panel Użytkownika:
+- Rejestracja: Przy wejściu pojawia się formularz (Imię i Nazwisko). Na ich podstawie generowany jest unikalny kod (hash/skrót z cyframi). Informacje o graczu (Imię, Nazwisko, Kod) muszą być stale widoczne w rogu ekranu.
+
+- Interfejs gry: Centralne okno (card) z polem wejściowym do wpisywania cyfr liczby Pi.
+
+- Informacja zwrotna (Feedback):
+
+  -- Po każdej poprawnie wpisanej cyfrze: zielona animacja (flash) wokół karty.
+
+  -- Po błędnej cyfrze: czerwona animacja oraz efekt "potrząsania" ekranem (shake).
+
+- System prób: Użytkownik ma do dyspozycji 3 życia (próby). Licznik pozostałych szans musi być widoczny na żywo.
+
+- Przycisk "Poddaj się": Umożliwia zakończenie gry w dowolnym momencie i zapisanie obecnego wyniku.
+
+- Ekran końcowy: Po utracie wszystkich prób pojawia się podsumowanie z wynikiem oraz spersonalizowany komunikat (zależny od liczby odgadniętych cyfr).
+
+2. Panel Administratora:
+- Dostęp: Strona /admin zabezpieczona hasłem.
+
+- Zarządzanie wynikami: Tabela wyświetlająca wszystkich uczestników: Imię, Nazwisko, Unikalny Kod oraz Wynik.
+
+- unkcje: Możliwość edycji wyników, usuwania rekordów oraz ręcznego dodawania wpisów.
+
+3. Wymagania Techniczne i Design:
+- Bezpieczeństwo: Rozwinięcie liczby PI oraz hasło administratora muszą być przechowywane po stronie serwera (PHP). Nie mogą być widoczne w kodzie źródłowym strony ani w konsoli przeglądarki.
+
+- Blokady: Całkowity zakaz wklejania tekstu (paste) do pola gry oraz blokada menu kontekstowego.
+
+- Design: Nowoczesny, profesjonalny wygląd oparty na ciemnym motywie z niebieskimi akcentami (styl Glassmorphism, gradienty, animacje CSS). Wykorzystanie bibliotek takich jak SweetAlert2 dla komunikatów oraz Animate.css dla efektów przejścia.
+
+- Język: Cały interfejs użytkownika oraz komunikaty muszą być w języku polskim.
+
+haslo hosting:
+irBO0LZRred85
+
+haslo admin:
+TwojeTajneHaslo123

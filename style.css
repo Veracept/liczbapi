@@ -1,0 +1,198 @@
+/* 1. RESET I PODSTAWY */
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
+
+:root {
+    --bg-dark: #020617;
+    --primary-blue: #38bdf8;
+    --accent-glow: rgba(56, 189, 248, 0.4);
+    --card-bg: rgba(15, 23, 42, 0.9); /* Zwiększona widoczność */
+    --error-red: #f43f5e;
+    --text-main: #f8fafc;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+/* 2. TŁO AURORA */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at 20% 30%, rgba(56, 189, 248, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(30, 58, 138, 0.2) 0%, transparent 40%);
+    z-index: -1;
+}
+
+/* 3. BANNER */
+.top-banner {
+    width: 100%;
+    height: 80px;
+    background: rgba(2, 6, 23, 0.95);
+    backdrop-filter: blur(15px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+    position: fixed;
+    top: 0; 
+    z-index: 1000;
+}
+
+.banner-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* 4. KARTA I KONTENER */
+.container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 20px 40px; /* Miejsce na banner i footer */
+}
+
+.glass-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 24px;
+    padding: 40px;
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+/* 5. FORMULARZ REJESTRACJI (Naprawa Twojego screena) */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Równe odstępy między polami */
+}
+
+/* 6. STYLE INPUTÓW */
+input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    padding: 15px;
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    transition: 0.3s;
+    outline: none;
+}
+
+input:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* Specjalny styl dla wpisywania PI w grze */
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 25px 0;
+}
+
+#pi-input {
+    width: 200px;
+    font-size: 1.5rem;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+/* 7. PRZYCISKI */
+button {
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    border: none;
+    background: var(--primary-blue);
+    color: var(--bg-dark);
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.3s;
+    text-transform: uppercase;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.btn-giveup {
+    background: transparent;
+    border: 1px solid var(--error-red);
+    color: var(--error-red);
+    margin-top: 10px;
+}
+
+.btn-giveup:hover {
+    background: var(--error-red);
+    color: white;
+}
+
+/* 8. ELEMENTY DODATKOWE */
+.user-info {
+    position: fixed;
+    top: 95px;
+    right: 20px;
+    background: var(--card-bg);
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.85rem;
+    z-index: 900;
+}
+
+.logout-link {
+    color: var(--error-red);
+    text-decoration: none;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    opacity: 0.8;
+}
+
+.pi-prefix {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--primary-blue);
+}
+
+.correct-flash { 
+    border-color: #10b981 !important; 
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4) !important; 
+}
+
+.error-shake { 
+    animation: shakeX 0.5s; 
+    border-color: var(--error-red) !important; 
+}
+
+footer {
+    padding: 20px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 0.75rem;
+}
