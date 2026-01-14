@@ -39,5 +39,3 @@ irBO0LZRred85
 
 haslo admin:
 TwojeTajneHaslo123
-
-$db = new mysqli("sql103.infinityfree.com", "if0_40868634", "irBO0LZRred85", "if0_40868634_pi_challenge");
