@@ -2,122 +2,188 @@
 session_start();
 
 
-$admin_password = "TwojeTajneHaslo123"; 
-$db = new mysqli("localhost", "root", "password", "pi_challenge");
-
-if (isset($_POST['login'])) {
-    if ($_POST['pass'] === $admin_password) {
-        $_SESSION['admin_logged'] = true;
+if (!isset($_SESSION['admin_logged_in'])) {
+    if (isset($_POST['password']) && $_POST['password'] === 'TwojeTajneHaslo123') { 
+        $_SESSION['admin_logged_in'] = true;
     } else {
-        $error = "Błędne hasło!";
+        echo '
+        <body style="background:#020617; display:flex; height:100vh; align-items:center; justify-content:center; font-family:sans-serif;">
+            <form method="post" style="text-align:center;">
+                <input type="password" name="password" placeholder="Hasło administratora" style="padding:10px; border-radius:5px; border:none;">
+                <button type="submit" style="padding:10px 20px; background:#38bdf8; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Wejdź</button>
+            </form>
+        </body>';
+        exit;
     }
 }
 
-if (isset($_GET['logout'])) {
-    session_destroy();
-    header("Location: admin.php");
-}
+$db = new mysqli("localhost", "root", "password", "pi_challenge");
+$db->set_charset("utf8mb4");
 
-if (isset($_GET['delete']) && isset($_SESSION['admin_logged'])) {
-    $id = intval($_GET['delete']);
-    $db->query("DELETE FROM results WHERE id = $id");
-    header("Location: admin.php");
-}
+$search = $_GET['search'] ?? '';
+$sort = $_GET['sort'] ?? 'newest';
 
 
-if (isset($_POST['update_score']) && isset($_SESSION['admin_logged'])) {
-    $id = intval($_POST['id']);
-    $new_score = intval($_POST['score']);
-    $db->query("UPDATE results SET score = $new_score WHERE id = $id");
-    exit("success");
+$sql = "SELECT * FROM results WHERE (name LIKE ? OR surname LIKE ? OR unique_code LIKE ?)";
+
+
+switch ($sort) {
+    case 'best_score':
+        $sql .= " ORDER BY score DESC, time_spent ASC"; 
+        break;
+    case 'best_time':
+
+        $sql .= " ORDER BY CASE WHEN score > 0 THEN 0 ELSE 1 END, time_spent ASC, score DESC"; 
+        break;
+    case 'oldest':
+        $sql .= " ORDER BY id ASC"; 
+        break;
+    default: 
+        $sql .= " ORDER BY id DESC"; 
+        break;
 }
+
+$stmt = $db->prepare($sql);
+$searchTerm = "%$search%";
+$stmt->bind_param("sss", $searchTerm, $searchTerm, $searchTerm);
+$stmt->execute();
+$results = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Panel Administratora - Pi Challenge</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - PI</title>
+    <link rel="stylesheet" href="style.css"> 
     <style>
-        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; color: white; }
-        .admin-table th, .admin-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; }
-        .admin-table tr:hover { background: rgba(255,255,255,0.05); }
-        .btn-del { color: #ef4444; text-decoration: none; font-weight: bold; }
-        .edit-input { background: transparent; border: 1px solid #38bdf8; color: white; width: 50px; padding: 5px; border-radius: 5px; }
-        .container { max-width: 900px; }
-
-
+        .admin-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 15px;
+        }
+        .admin-input {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            background: rgba(15, 23, 42, 0.8);
+            color: white;
+            outline: none;
+        }
+        .admin-btn {
+            padding: 12px 25px;
+            background: var(--primary-blue);
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #e2e8f0;
+        }
+        .data-table th {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 2px solid #38bdf8;
+            color: #38bdf8;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .data-table tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        .badge-score {
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <?php if (!isset($_SESSION['admin_logged'])): ?>
-        <div class="glass-card animate__animated animate__fadeIn">
-            <h2>Panel <span class="accent">Admina</span></h2>
-            <?php if(isset($error)) echo "<p style='color:red'>$error</p>"; ?>
-            <form method="post">
-                <input type="password" name="pass" placeholder="Hasło administratora" required>
-                <button type="submit" name="login">Zaloguj się</button>
-            </form>
+    <div class="top-banner">
+        <div class="banner-content">
+            <h1>Panel <span style="color:#38bdf8">Admina</span></h1>
         </div>
-    <?php else: ?>
-        <div class="glass-card animate__animated animate__fadeIn" style="width: 100%;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2>Lista <span class="accent">Wyników</span></h2>
-                <a href="?logout" style="color: #38bdf8; text-decoration: none;">Wyloguj</a>
-            </div>
+        <div style="position: absolute; right: 30px;">
+            <a href="index.php" style="color: white; margin-right: 20px; text-decoration: none;">Home</a>
+            <a href="?logout=1" style="color: #f43f5e; text-decoration: none;">Log out</a>
+        </div>
+    </div>
+
+    <div class="container" style="align-items: flex-start; padding-top: 120px;">
+        <div class="glass-card" style="max-width: 1000px; width: 95%;">
             
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Imię i Nazwisko</th>
-                        <th>Kod</th>
-                        <th>Wynik</th>
-                        <th>Akcje</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $res = $db->query("SELECT * FROM results ORDER BY created_at DESC");
-                    while ($row = $res->fetch_assoc()):
-                    ?>
-                    <tr>
-                        <td><?php echo $row['id']; ?></td>
-                        <td><?php echo $row['name'] . " " . $row['surname']; ?></td>
-                        <td><code><?php echo $row['unique_code']; ?></code></td>
-                        <td>
-                            <input type="number" class="edit-input" value="<?php echo $row['score']; ?>" 
-                                   onchange="updateScore(<?php echo $row['id']; ?>, this.value)">
-                        </td>
-                        <td>
-                            <a href="?delete=<?php echo $row['id']; ?>" class="btn-del" onclick="return confirm('Usunąć?')">Usuń</a>
-                        </td>
-                    </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
+            <form method="GET" class="admin-controls">
+                <input type="text" name="search" class="admin-input" style="flex: 1;" placeholder="Szukaj (Imię, Nazwisko, Kod)..." value="<?= htmlspecialchars($search) ?>">
+                
+                <select name="sort" class="admin-input" onchange="this.form.submit()" style="cursor: pointer;">
+                    <option value="newest" <?= $sort == 'newest' ? 'selected' : '' ?>>▼ Najnowsi (domyślne)</option>
+                    <option value="best_score" <?= $sort == 'best_score' ? 'selected' : '' ?>>★ Najlepszy wynik</option>
+                    <option value="best_time" <?= $sort == 'best_time' ? 'selected' : '' ?>>⏱️ Najlepszy czas</option>
+                    <option value="oldest" <?= $sort == 'oldest' ? 'selected' : '' ?>>▲ Najstarsi</option>
+                </select>
+
+                <button type="submit" class="admin-btn">Szukaj / Odśwież</button>
+            </form>
+
+            <div style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Uczestnik</th>
+                            <th>Unikalny Kod</th>
+                            <th>Wynik (PI)</th>
+                            <th>Czas</th>
+                            <th>Data</th>
+                            <th>Akcja</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if($results->num_rows > 0): ?>
+                            <?php while($row = $results->fetch_assoc()): ?>
+                            <tr>
+                                <td style="opacity: 0.5;"><?= $row['id'] ?></td>
+                                <td>
+                                    <strong><?= htmlspecialchars($row['name'] . ' ' . $row['surname']) ?></strong>
+                                </td>
+                                <td><code style="background:rgba(0,0,0,0.3); padding:3px 6px; border-radius:4px;"><?= $row['unique_code'] ?></code></td>
+                                <td>
+                                    <span class="badge-score"><?= $row['score'] ?></span>
+                                </td>
+                                <td><?= $row['time_spent'] ?> s</td>
+                                <td style="font-size: 0.85rem; opacity: 0.7;"><?= $row['created_at'] ?></td>
+                                <td>
+                                    <a href="delete.php?id=<?= $row['id'] ?>" onclick="return confirm('Usunąć ten wynik?');" style="color: #f43f5e; font-weight: bold; text-decoration: none;">Usuń</a>
+                                </td>
+                            </tr>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="7" style="text-align:center; padding: 30px; opacity: 0.6;">Brak wyników</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
         </div>
-    <?php endif; ?>
-</div>
-
-<script>
-function updateScore(id, newScore) {
-    const formData = new FormData();
-    formData.append('update_score', '1');
-    formData.append('id', id);
-    formData.append('score', newScore);
-
-    fetch('admin.php', {
-        method: 'POST',
-        body: formData
-    }).then(res => {
-        if(res.ok) alert('Wynik zaktualizowany!');
-    });
-}
-</script>
+    </div>
 
 </body>
 </html>
